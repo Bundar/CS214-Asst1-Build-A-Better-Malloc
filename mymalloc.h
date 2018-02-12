@@ -7,6 +7,6 @@ void* mymalloc(size_t,char*,int);
 void* myfree(size_t,char*,int);
 //Typedef for the MemNode type.
 typedef struct _MemNode{
-  char* word;
-  struct _MemNode* next;
+  unsigned short active;//2-bytes == last two bytes of node address.
+  struct _MemNode* next;//8-bytes
 }MemNode;
