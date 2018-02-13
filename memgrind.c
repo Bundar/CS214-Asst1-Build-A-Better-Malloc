@@ -41,7 +41,7 @@ int main(){
 		gettimeofday(&end, NULL); //end time
 		meanTime+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;
 		
-		
+		//workload C
 		
 	}
 	
