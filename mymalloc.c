@@ -19,24 +19,67 @@ void* mymalloc(size_t size, char* file, int line)
 {
   //treats the first addess of mem as if it was a MemNode.
   MemNode* p = mem;
-  unsigned short i = *((unsigned short *)&p);
-  //run until memory is found that is not intentionally placed or used and there is enough space.
-  //while((p->active == *((unsigned short *)&p)) || ((p->next->active == *((unsigned short *)(p->next))) && (&p+sizeof(MemNode)+size) > (p->next)))
-  while((p->active == *((unsigned short *)&p)) || (((p+(p->next))->active == *((unsigned short *)&(p+(p->next)))) && (p->next-sizeof(MemNode)>size)))//sorry for ugly while loop
+  //sets previous 
+  unsigned short prev = NULL;
+  //check if any memory has been allocated already by checking if p->prev is NULL already.
+  if(p->prev != NULL)
+  {
+    //check if you are trying to allocate more than 4994 bytes
+    if(size>(5000-sizeof(MemNode)))
+    {
+      printf("%s:%d error: not enough addressable memory.\n",file,line);
+      return NULL;
+    }
+    //create first node and second node to manage the tail.
+    p->prev = NULL;
+    p->next = ((char*)p)+size+sizeof(MemNode);
+    MemNode* nextNode = (MemNode*)(((char*)p)+(p->next));
+    nextNode->prev = p->next;
+    nextNode->next = 5000 - (nextNode->prev + sizeof(MemNode));
+    return (void*)(p+1);
+  }
+  //if first node is alreay allocated, run until memory is found that is not intentionally placed or used and there is enough space.
+  //while: node is active OR (Node is inactive AND theres not enough space to return a safe pointer to
+  while((p->active == *((unsigned short *)&p)) || ((p->active != *((unsigned short *)&p)) && (p->next-sizeof(MemNode)<size)))
   {
     //checks if requested memory will fit in remaining space.
-    if((&p+sizeof(MemNode)+size) > (mem+5000))
+    if((((char*)(p+1))+size) > (mem+5000))
     {
       printf("%s:%d error: no remaining addressable memory.\n",file,line);
       return NULL;
     }
-    //increments ptr to next MemNode
-    p+=p->next;
+    //increments ptr to next MemNode and increments prev
+    prev = (p->next);
+    p=(MemNode*)(((char*)p)+(p->next));
   }
-  p->active = *((unsigned short *)&p);
-  p->next = (unsigned short)(sizeof(MemNode) + size);
+  //once loop finds open node or empty space: 
+  //first check if adding to end of LL
+  if(((char*)p)+p->next == mem+5000)
+  {  
+    MemNode* newTail = (MemNode*)((char*)p + size);
+    newTail->next = (mem+5000) - (((char*)newTail) + sizeof(MemNode));
+    newTail->prev = size;
+    p->active = *((unsigned short *)&p);
+    p->next = size;
+    return (void*)(p+1);    
+  }
+  //then deal with if adding in middle
+  unsigned short bytesTilNext = p->next
+  //checks if there is more than enough space
+  if((size+sizeof(MemNode)+1)<bytesTilNext)
+  {
+    MemNode* newNode = (MemNode*)((char*)p + bytesTilNext);
+    newNode->next = (bytesTilNext) - (size + sizeof(MemNode));
+    newNode->prev = size;
+    p->active = *((unsigned short *)&p);
+    p->next = size;
+    return (void*)(p+1);
+  }
+  
+  //if there is just enough space or not enough space for the new node and the size
   //returns pointer to memory allocated right after meta data.
-  return (void*)(&p+sizeof(MemNode));
+  p->active = *((unsigned short *)&p);
+  return (void*)(p+1);
 }
 /*
 Function: myfree
@@ -49,22 +92,64 @@ returns: The pointer to the head of the memory that is now available.
 */
 void* free(void* ptr, char* file, int line)
 {
-  //checks if ptr points to a place in the array of 5000 chars
-  if(&ptr-sizeof(MemNode) < mem || &ptr-sizeof(MemNode) > &mem+5000)
+  //checks if ptr points to a place NOT in the array of 5000 chars
+  if(ptr-sizeof(MemNode) < mem || ptr-sizeof(MemNode) > mem+5000)
   {
     printf("%s:%d error: out of bounds of addressable memory.\n",file,line);
     return NULL;
   }
-  MemNode* node = &ptr-sizeof(MemNode);
-  //checks if ptr points to a valid previously allocated memory address
+  //finds MemNode that manages given memory
+  MemNode* node = ptr-sizeof(MemNode);
+  //checks if node points to a valid previously allocated memory address
   if(node->active != *((unsigned short *)&node))
   {
-    printf("%s:%d error: pointer does not point to valid allocated memory address.\n",file,line);
+    printf("%s:%d error: Pointer does not point to valid allocated memory address.\n",file,line);
     return NULL;
   }
   //if given a valid ptr
   else
   {
+    unsigned short prev = node->prev;
+    unsigned short next = node->next;
+    //free current node
+    node->active = NULL;
+    //find prev and next
+    if(prev == NULL)
+    {//if freeing first node in array.
+      MemNode* prevNode = NULL;
+    }
+    else
+    {
+      MemNode* prevNode = (MemNode*)(((char*)node)-prev);
+    }
+    if((((char*)node)+next) >= mem+5000-sizeof(MemNode))
+    {//if at end of array.
+      printf("%s:%d error: Pointer does not point to valid allocated memory address.\n",file,line);
+      return NULL;
+    }
+    else
+    {
+      MemNode* nextNode = (MemNode*)(((char*)node)+next); 
+    }
+    //check if previous is also free
+    if(prevNode != NULL)
+    {
+      if(prevNode->active != *((unsigned short *)&prevNode))
+      {
+        prevNode->next += node->next;
+        nextNode->prev += node->prev;
+        node = prevNode;
+      }
+    }
+    //check if next is also free
     
+    if(nextNode->active != *((unsigned short *)&nextNode))
+    {
+      if(nextNode->prev == node->next)
+      node->next += nextNode->next;
+      nextNode->prev = node->next;
+    }
+    //return void ptr to node a head of free space.
+    return (void*)((char*)(node)-prev);
   }
 }
