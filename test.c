@@ -1,12 +1,12 @@
 int main(){
 
 
-unsigned int test = 12345;
-unsigned int ptr = &test;
+unsigned short test = 12345;
+unsigned short ptr = (unsigned)&test;
 
-printf("test: %d, &test: %p\n", test, &test);
+printf("test: %u, &test: %p\n", test, &test);
 
-ptr = (ptr<<14U)>>14U;
+ptr = (ptr<<14)>>14;
 
 printf("ptr: %x\n", ptr);
 
