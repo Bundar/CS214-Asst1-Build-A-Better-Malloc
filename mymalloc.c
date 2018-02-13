@@ -106,50 +106,75 @@ void* free(void* ptr, char* file, int line)
     printf("%s:%d error: Pointer does not point to valid allocated memory address.\n",file,line);
     return NULL;
   }
-  //if given a valid ptr
+  //if given a valid ptr continue from here.
+  /*
+  set node to inactive then:
+  cases:
+  1.) freeing head.
+    - if next is free:
+      - node->next += nextNode->next
+      - if nextNode != tail:
+        - nextnextNode->prev += nextNode->prev
+  2.) freeing node with prev node already freed.
+    - prevNode->next += node->next
+    - if last node:
+      - return
+    - else:
+      - nextNode->prev += node->prev
+      - set node to prevNode and continue to case 3.
+  3.) freeing node with next node already freed.
+    - node->next += nextNode->next
+    - if nextNode != tail:
+      - nextnextNode->prev += nextNode->prev      
+  */
   else
   {
-    unsigned short prev = node->prev;
-    unsigned short next = node->next;
-    //free current node
+    //set node to inactive no matter which case.
     node->active = NULL;
-    //find prev and next
-    if(prev == NULL)
-    {//if freeing first node in array.
-      MemNode* prevNode = NULL;
-    }
-    else
+    //Case 1:
+    MemNode* nextNode = (MemNode*)(((char*)node)+node->next);
+    //if head
+    if(node->prev == NULL)
     {
-      MemNode* prevNode = (MemNode*)(((char*)node)-prev);
-    }
-    if((((char*)node)+next) >= mem+5000-sizeof(MemNode))
-    {//if at end of array.
-      printf("%s:%d error: Pointer does not point to valid allocated memory address.\n",file,line);
-      return NULL;
-    }
-    else
-    {
-      MemNode* nextNode = (MemNode*)(((char*)node)+next); 
-    }
-    //check if previous is also free
-    if(prevNode != NULL)
-    {
-      if(prevNode->active != *((unsigned short *)&prevNode))
+      //MemNode* nextNode = (MemNode*)(((char*)node)+node->next);
+      //if next is also free
+      if(nextNode->active != *((unsigned short *)&nextNode))
       {
-        prevNode->next += node->next;
-        nextNode->prev += node->prev;
-        node = prevNode;
+        node->next += nextNode->next;
+        //if next is not tail node
+        if(((char*)nextNode)+nextNode->next != mem+5000)
+        {
+          MemNode* nextnextNode = (MemNode*)(((char*)nextNode)+nextNode->next);
+          nextnextNode->prev += nextNode->prev;
+        }
       }
+      return (void*)(node+1);
     }
-    //check if next is also free
-    
+    //Case 2:
+    MemNode* prevNode = (MemNode*)(((char*)node)-node->prev);
+    //if prev is free
+    if(prevNode->active != *((unsigned short *)&prevNode))
+    {
+      prevNode->next += node->next;
+      //if next is tail
+      if(((char*)nextNode)+nextNode->next == mem+5000)
+      {
+        return (void*)(node+1);
+      }
+      nextNode->prev += node->prev;
+      node = prevNode;
+    }
+    //Case 3:
+    nextNode = (MemNode*)(((char*)node)+node->next);
     if(nextNode->active != *((unsigned short *)&nextNode))
     {
-      if(nextNode->prev == node->next)
       node->next += nextNode->next;
-      nextNode->prev = node->next;
+      if(((char*)nextNode)+nextNode->next != mem+5000)
+      {
+        MemNode* nextnextNode = (MemNode*)(((char*)nextNode)+nextNode->next);
+        nextnextNode->prev += nextNode->prev;
+      }
     }
-    //return void ptr to node a head of free space.
-    return (void*)((char*)(node)-prev);
+    return (void*)(node+1);
   }
 }
