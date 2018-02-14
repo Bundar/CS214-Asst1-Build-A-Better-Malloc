@@ -1,9 +1,16 @@
-//memgrind.c
+/*
+CS:214
+Dunbar Paul Birnie IV && Prad Rao
+Assignment 1: Build A Better Malloc
+2/12/18
+memgrind.c
+-------------------------------------
+tests our implementation of the malloc function and analyzes time complexity.
+*/
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
 int main(){
 	int i;
 	//array for the mean times for the six test cases, A-F
@@ -45,7 +52,9 @@ int main(){
 		j = 0;
 		
 		srand(time(0));
-		
+		//workload D
+    //workload E
+    //workload F
 		
 	}
 	

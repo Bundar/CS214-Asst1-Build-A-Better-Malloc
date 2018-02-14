@@ -3,6 +3,9 @@ CS:214
 Dunbar Paul Birnie IV && Prad Rao
 Assignment 1: Build A Better Malloc
 2/12/18
+mymalloc.c
+-------------------------------------
+immplements our version of malloc
 */
 #include <stdio.h>
 #include "mymalloc.h"
@@ -39,7 +42,6 @@ void* mymalloc(size_t size, char* file, int line)
   }
   //if first node is alreay allocated, run until memory is found that is not intentionally placed or used and there is enough space.
   //while: node is active OR (Node is inactive AND theres not enough space to return a safe pointer to
-  unsigned short prev = 0;
   while((p->active == *((unsigned short *)&p)) || ((p->active != *((unsigned short *)&p)) && (p->next-sizeof(MemNode)<size)))
   {
     //checks if requested memory will fit in remaining space.
@@ -48,8 +50,6 @@ void* mymalloc(size_t size, char* file, int line)
       printf("%s:%d error: no remaining addressable memory.\n",file,line);
       return NULL;
     }
-    //increments ptr to next MemNode and increments prev
-    prev = (p->next);
     p=(MemNode*)(((char*)p)+(p->next));
   }
   //once loop finds open node or empty space: 
