@@ -20,9 +20,8 @@ void* mymalloc(size_t size, char* file, int line)
   //treats the first addess of mem as if it was a MemNode.
   MemNode* p = mem;
   //sets previous 
-  unsigned short prev = NULL;
-  //check if any memory has been allocated already by checking if p->prev is NULL already.
-  if(p->prev != NULL)
+  //check if any memory has been allocated already by checking if p->prev is 0 already.
+  if(p->prev != 0)
   {
     //check if you are trying to allocate more than 4994 bytes
     if(size>(5000-sizeof(MemNode)))
@@ -31,8 +30,8 @@ void* mymalloc(size_t size, char* file, int line)
       return NULL;
     }
     //create first node and second node to manage the tail.
-    p->prev = NULL;
-    p->next = ((char*)p)+size+sizeof(MemNode);
+    p->prev = 0;
+    p->next = size+sizeof(MemNode);
     MemNode* nextNode = (MemNode*)(((char*)p)+(p->next));
     nextNode->prev = p->next;
     nextNode->next = 5000 - (nextNode->prev + sizeof(MemNode));
@@ -40,6 +39,7 @@ void* mymalloc(size_t size, char* file, int line)
   }
   //if first node is alreay allocated, run until memory is found that is not intentionally placed or used and there is enough space.
   //while: node is active OR (Node is inactive AND theres not enough space to return a safe pointer to
+  unsigned short prev = 0;
   while((p->active == *((unsigned short *)&p)) || ((p->active != *((unsigned short *)&p)) && (p->next-sizeof(MemNode)<size)))
   {
     //checks if requested memory will fit in remaining space.
@@ -64,12 +64,11 @@ void* mymalloc(size_t size, char* file, int line)
     return (void*)(p+1);    
   }
   //then deal with if adding in middle
-  unsigned short bytesTilNext = p->next
   //checks if there is more than enough space
-  if((size+sizeof(MemNode)+1)<bytesTilNext)
+  if((size+sizeof(MemNode)+1)<p->next)
   {
-    MemNode* newNode = (MemNode*)((char*)p + bytesTilNext);
-    newNode->next = (bytesTilNext) - (size + sizeof(MemNode));
+    MemNode* newNode = (MemNode*)((char*)p + p->next);
+    newNode->next = (p->next) - (size + sizeof(MemNode));
     newNode->prev = size;
     p->active = *((unsigned short *)&p);
     p->next = size;
@@ -90,7 +89,7 @@ file: file name of file being ran.
 line: line number of current function call.
 returns: The pointer to the head of the memory that is now available.
 */
-void* free(void* ptr, char* file, int line)
+void* myfree(void* ptr, char* file, int line)
 {
   //checks if ptr points to a place NOT in the array of 5000 chars
   if(ptr-sizeof(MemNode) < mem || ptr-sizeof(MemNode) > mem+5000)
@@ -130,11 +129,11 @@ void* free(void* ptr, char* file, int line)
   else
   {
     //set node to inactive no matter which case.
-    node->active = NULL;
+    node->active = 0;
     //Case 1:
     MemNode* nextNode = (MemNode*)(((char*)node)+node->next);
     //if head
-    if(node->prev == NULL)
+    if(node->prev == 0)
     {
       //MemNode* nextNode = (MemNode*)(((char*)node)+node->next);
       //if next is also free
