@@ -29,8 +29,8 @@ void* mymalloc(size_t size, char* file, int line)
   //check if any memory has been allocated already by checking if p->prev is set to current address.
   if(p->prev != *((unsigned short *)&p))
   {
-    //check if you are trying to allocate more than 4994 bytes
-    if(size>(5000-sizeof(MemNode)))
+    //check if you are trying to allocate more than 4988 bytes
+    if(size>(5000-(2*sizeof(MemNode))))
     {
       printf("%s:%d error: not enough addressable memory.\n",file,line);
       return NULL;
@@ -39,7 +39,7 @@ void* mymalloc(size_t size, char* file, int line)
     p->prev = *((unsigned short *)&p);
     p->next = size+sizeof(MemNode);
     MemNode* nextNode = (MemNode*)(((char*)p)+(p->next));
-    nextNode->prev = p->next;
+    nextNode->prev = p->next + sizeof(MemNode);
     nextNode->next = 5000 - (nextNode->prev + sizeof(MemNode));
     return (void*)(p+1);
   }
