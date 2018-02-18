@@ -117,23 +117,23 @@ int main(){
 		gettimeofday(&end, NULL); //end time
 		meanTime[4]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;
    	 		
-/*    		//workload F*/
-/*    		*/
-/*    		char* f[150] = {NULL};*/
-/*    		*/
-/*    		gettimeofday(&start, NULL); //start time*/
-/*		for (j=0;j<150;j++){*/
-/*			f[j] = (char*) malloc(27);*/
-/*		}*/
-/*		*/
-/*		for (j=1; j<149;j++){*/
-/*			free(f[j]);*/
-/*		}*/
-/*		*/
-/*		f[1]= (char*) malloc(4500);*/
-/*		f[1] = (char*) malloc(3000);*/
-/*		gettimeofday(&end, NULL); //end time*/
-/*		meanTime[5]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;*/
+    		//workload F
+    		
+    		char* f[150] = {NULL};
+    		
+    		gettimeofday(&start, NULL); //start time
+		for (j=0;j<150;j++){
+			f[j] = (char*) malloc(27);
+		}
+		
+		for (j=1; j<149;j++){
+			free(f[j]);
+		}
+		
+		f[1]= (char*) malloc(4500);
+		f[1] = (char*) malloc(3000);
+		gettimeofday(&end, NULL); //end time
+		meanTime[5]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;
 	}
 	
 	float meanSec[6] = {0};
