@@ -13,7 +13,7 @@ immplements our version of malloc
 Function: mymalloc
 -------------------------------------
 computes address of allocatable space in the array mem of 5000 bytes by treating it as a linked list of MemNodes which store basic meta data.
-size: ammount of space requested to be dynamically allocated.
+size: amount of space requested to be dynamically allocated.
 file: file name of file being ran.
 line: line number of current function call.
 returns: The pointer to the head of the memory with size equal to or greater than the ammount requested.

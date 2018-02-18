@@ -10,6 +10,9 @@ tests our implementation of the malloc function and analyzes time complexity.
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "mymalloc.c"
+
+static char mem[5000];
 
 int main(){
 	int i, j, k, m, f;
@@ -135,6 +138,8 @@ int main(){
 		gettimeofday(&end, NULL); //end time
 		meanTime[5]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;
 	}
+	
+	char* g = (char*) malloc(6000);
 	
 	float meanSec[6] = {0};
 	
