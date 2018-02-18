@@ -136,7 +136,7 @@ void* myfree(void* ptr, char* file, int line)
     //Case 1:
     MemNode* nextNode = (MemNode*)(((char*)node)+node->next);
     //if head
-    if(node->prev == *((unsigned short *)&p))
+    if(node->prev == *((unsigned short *)&node))
     {
       //MemNode* nextNode = (MemNode*)(((char*)node)+node->next);
       //if next is also free
