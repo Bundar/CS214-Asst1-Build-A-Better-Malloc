@@ -10,7 +10,7 @@ tests our implementation of the malloc function and analyzes time complexity.
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "mymalloc.c"
+#include "mymalloc.h"
 
 int main(){
 	int n = 1;
