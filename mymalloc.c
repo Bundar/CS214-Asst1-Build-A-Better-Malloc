@@ -101,11 +101,11 @@ void* myfree(void* ptr, char* file, int line)
     return NULL;
   }
   //finds MemNode that manages given memory
-  MemNode* node = ptr-sizeof(MemNode);
+  MemNode* node = (MemNode*)(((char*)ptr)-sizeof(MemNode));
   //checks if node points to a valid previously allocated memory address
   if(node->active != *((unsigned short *)&node))
   {
-    printf("%s:%d error: Pointer does not point to valid allocated memory address.\n",file,line);
+    printf("%s:%d error: 1: Pointer does not point to valid allocated memory address.\n",file,line);
     return NULL;
   }
   //if given a valid ptr continue from here.
