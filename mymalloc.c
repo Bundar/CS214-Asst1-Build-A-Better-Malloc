@@ -9,10 +9,13 @@ immplements our version of malloc
 */
 #include <stdio.h>
 #include "mymalloc.h"
+
+static char myblock[5000];
+
 /*
 Function: mymalloc
 -------------------------------------
-computes address of allocatable space in the array mem of 5000 bytes by treating it as a linked list of MemNodes which store basic meta data.
+computes address of allocatable space in the array myblock of 5000 bytes by treating it as a linked list of MemNodes which store basic meta data.
 size: amount of space requested to be dynamically allocated.
 file: file name of file being ran.
 line: line number of current function call.
@@ -21,7 +24,7 @@ returns: The pointer to the head of the memory with size equal to or greater tha
 void* mymalloc(size_t size, char* file, int line)
 {
   //treats the first addess of mem as if it was a MemNode.
-  MemNode* p = mem;
+  MemNode* p = (void*) myblock;
   //sets previous 
   //check if any memory has been allocated already by checking if p->prev is 0 already.
   if(p->prev != 0)
@@ -45,7 +48,7 @@ void* mymalloc(size_t size, char* file, int line)
   while((p->active == *((unsigned short *)&p)) || ((p->active != *((unsigned short *)&p)) && (p->next-sizeof(MemNode)<size)))
   {
     //checks if requested memory will fit in remaining space.
-    if((((char*)(p+1))+size) > (mem+5000))
+    if((((char*)(p+1))+size) > (myblock+5000))
     {
       printf("%s:%d error: no remaining addressable memory.\n",file,line);
       return NULL;
@@ -54,10 +57,10 @@ void* mymalloc(size_t size, char* file, int line)
   }
   //once loop finds open node or empty space: 
   //first check if adding to end of LL
-  if(((char*)p)+p->next == mem+5000)
+  if(((char*)p)+p->next == myblock+5000)
   {  
     MemNode* newTail = (MemNode*)((char*)p + size);
-    newTail->next = (mem+5000) - (((char*)newTail) + sizeof(MemNode));
+    newTail->next = (myblock+5000) - (((char*)newTail) + sizeof(MemNode));
     newTail->prev = size;
     p->active = *((unsigned short *)&p);
     p->next = size;
@@ -92,7 +95,7 @@ returns: The pointer to the head of the memory that is now available.
 void* myfree(void* ptr, char* file, int line)
 {
   //checks if ptr points to a place NOT in the array of 5000 chars
-  if(ptr-sizeof(MemNode) < mem || ptr-sizeof(MemNode) > mem+5000)
+  if(ptr-sizeof(MemNode) < (void*) myblock || ptr-sizeof(MemNode) > (void*) myblock+5000)
   {
     printf("%s:%d error: out of bounds of addressable memory.\n",file,line);
     return NULL;
@@ -141,7 +144,7 @@ void* myfree(void* ptr, char* file, int line)
       {
         node->next += nextNode->next;
         //if next is not tail node
-        if(((char*)nextNode)+nextNode->next != mem+5000)
+        if(((char*)nextNode)+nextNode->next != myblock+5000)
         {
           MemNode* nextnextNode = (MemNode*)(((char*)nextNode)+nextNode->next);
           nextnextNode->prev += nextNode->prev;
@@ -156,7 +159,7 @@ void* myfree(void* ptr, char* file, int line)
     {
       prevNode->next += node->next;
       //if next is tail
-      if(((char*)nextNode)+nextNode->next == mem+5000)
+      if(((char*)nextNode)+nextNode->next == myblock+5000)
       {
         return (void*)(node+1);
       }
@@ -168,7 +171,7 @@ void* myfree(void* ptr, char* file, int line)
     if(nextNode->active != *((unsigned short *)&nextNode))
     {
       node->next += nextNode->next;
-      if(((char*)nextNode)+nextNode->next != mem+5000)
+      if(((char*)nextNode)+nextNode->next != myblock+5000)
       {
         MemNode* nextnextNode = (MemNode*)(((char*)nextNode)+nextNode->next);
         nextnextNode->prev += nextNode->prev;
