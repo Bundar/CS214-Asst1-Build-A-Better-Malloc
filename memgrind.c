@@ -93,20 +93,9 @@ int main(){
    	 	char* ptr = (char*) malloc(4994);	
    	 	char* ptr2 = (char*) malloc(10);
    	 	
-   	 	j = 0, m = 0, f = 0;
+   	 	j = 0, m = 0, f = 0, k = 0;
 		srand(time(0));
 		char* e[150] = {NULL};
-		int rndptr[150] = {0};
-		for (j = 0; j<150; j++){
-			rndptr[j]=j;
-		}
-		for (j = 0; j<150; j++){
-			int temp = rndptr[j];
-			int rndInd = rand() % 150;	
-			rndptr[j] = rndptr[rndInd];
-			rndptr[rndInd] = temp;
-		}
-		k = 0;
 		
 		gettimeofday(&start, NULL); //start time
 		while(m+f<300){
@@ -116,9 +105,11 @@ int main(){
 				m++, j++;
 			}
 			else if(j>0){
-				free(e[rndptr[k++]]);
-				if (i==1)
-					printf("%d ", k);
+				int rdPtr = rand() % j;
+				free(e[rdPtr]);
+				for (k=rdPtr; k<j; k++){
+					e[k] = e[k+1];
+				}
 				f++, j--;
 				
 			}
