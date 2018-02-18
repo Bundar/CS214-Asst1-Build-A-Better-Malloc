@@ -20,7 +20,6 @@ int main(){
 	for (i = 0; i<6; i++){
 		meanTime[i] = 0;
 	}
-	char* a;
 	
 	//100 iterations of workloads
 	i = 0;
@@ -32,7 +31,7 @@ int main(){
 		j = 0;
 		gettimeofday(&start, NULL); //start time 
 		for (j = 0; j<150; j++){ //150 iterations
-			//char* a = (char*) malloc(1); //mallocs 1 byte
+			char* a = (char*) malloc(1); //mallocs 1 byte
 			free(a); //immediately frees
 		}
 		gettimeofday(&end, NULL); //end time

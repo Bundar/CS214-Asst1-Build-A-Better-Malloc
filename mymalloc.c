@@ -12,6 +12,8 @@ immplements our version of malloc
 
 static char myblock[5000];
 
+static int errorCount = 0;
+
 /*
 Function: mymalloc
 -------------------------------------
@@ -24,7 +26,7 @@ returns: The pointer to the head of the memory with size equal to or greater tha
 void* mymalloc(size_t size, char* file, int line)
 {
   //treats the first addess of mem as if it was a MemNode.
-  MemNode* p = (void*) myblock;
+  MemNode* p = (MemNode*) myblock;
   //sets previous 
   //check if any memory has been allocated already by checking if p->prev is set to current address.
   if(p->prev != *((unsigned short *)&p))
@@ -45,7 +47,7 @@ void* mymalloc(size_t size, char* file, int line)
   }
   //if first node is alreay allocated, run until memory is found that is not intentionally placed or used and there is enough space.
   //while: node is active OR (Node is inactive AND theres not enough space to return a safe pointer to
-  while((p->active == *((unsigned short *)&p)) || ((p->active != *((unsigned short *)&p)) && (p->next-sizeof(MemNode)<size)))
+  while((p->active == *((unsigned short *)&p)) || ((p->active != *((unsigned short *)&p)) && (p->next-sizeof(MemNode)<=size)))
   {
     //checks if requested memory will fit in remaining space.
     if((((char*)(p+1))+size) > (myblock+5000))
@@ -105,8 +107,9 @@ void* myfree(void* ptr, char* file, int line)
   //checks if node points to a valid previously allocated memory address
   if(node->active != *((unsigned short *)&node))
   {
-    printf("%s:%d error: 1: Pointer does not point to valid allocated memory address.\n",file,line);
-    return NULL;
+  	errorCount++;
+  	printf("%s:%d error: %d: Pointer does not point to valid allocated memory address.\n",file,line, errorCount);
+  	return NULL;
   }
   //if given a valid ptr continue from here.
   /*
