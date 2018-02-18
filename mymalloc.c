@@ -23,8 +23,8 @@ void* mymalloc(size_t size, char* file, int line)
   //treats the first addess of mem as if it was a MemNode.
   MemNode* p = mem;
   //sets previous 
-  //check if any memory has been allocated already by checking if p->prev is 0 already.
-  if(p->prev != 0)
+  //check if any memory has been allocated already by checking if p->prev is set to current address.
+  if(p->prev != *((unsigned short *)&p))
   {
     //check if you are trying to allocate more than 4994 bytes
     if(size>(5000-sizeof(MemNode)))
@@ -33,7 +33,7 @@ void* mymalloc(size_t size, char* file, int line)
       return NULL;
     }
     //create first node and second node to manage the tail.
-    p->prev = 0;
+    p->prev = *((unsigned short *)&p);
     p->next = size+sizeof(MemNode);
     MemNode* nextNode = (MemNode*)(((char*)p)+(p->next));
     nextNode->prev = p->next;
@@ -133,7 +133,7 @@ void* myfree(void* ptr, char* file, int line)
     //Case 1:
     MemNode* nextNode = (MemNode*)(((char*)node)+node->next);
     //if head
-    if(node->prev == 0)
+    if(node->prev == *((unsigned short *)&p))
     {
       //MemNode* nextNode = (MemNode*)(((char*)node)+node->next);
       //if next is also free
