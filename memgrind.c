@@ -10,7 +10,7 @@ tests our implementation of the malloc function and analyzes time complexity.
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+
 int main(){
 	int i, j, k, m, f;
 	//array for the mean times for the six test cases, A-F
@@ -60,8 +60,8 @@ int main(){
 				m++, j++;
 			}
 			else if(j>0){
+				f++, j--;				
 				free(c[j]);
-				f++, j--;
 				
 			}
 		}
@@ -81,8 +81,8 @@ int main(){
 				m++, j++;
 			}
 			else if(j>0){
-				free(d[j]);
 				f++, j--;
+				free(d[j]);
 				
 			}
 		}
@@ -117,6 +117,8 @@ int main(){
 			}
 			else if(j>0){
 				free(e[rndptr[k++]]);
+				if (i==1)
+					printf("%d ", k);
 				f++, j--;
 				
 			}
@@ -124,40 +126,46 @@ int main(){
 		gettimeofday(&end, NULL); //end time
 		meanTime[4]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;
    	 		
-    		//workload F
-    		
-    		char* f[150] = {NULL};
-    		
-    		gettimeofday(&start, NULL); //start time
-		for (j=0;j<150;j++){
-			f[j] = (char*) malloc(27);
-		}
-		
-		for (j=1; j<149;j++){
-			free(f[j]);
-		}
-		
-		f[1]= (char*) malloc(4500);
-		f[1] = (char*) malloc(3000);
-		gettimeofday(&end, NULL); //end time
-		meanTime[5]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;
+/*    		//workload F*/
+/*    		*/
+/*    		char* f[150] = {NULL};*/
+/*    		*/
+/*    		gettimeofday(&start, NULL); //start time*/
+/*		for (j=0;j<150;j++){*/
+/*			f[j] = (char*) malloc(27);*/
+/*		}*/
+/*		*/
+/*		for (j=1; j<149;j++){*/
+/*			free(f[j]);*/
+/*		}*/
+/*		*/
+/*		f[1]= (char*) malloc(4500);*/
+/*		f[1] = (char*) malloc(3000);*/
+/*		gettimeofday(&end, NULL); //end time*/
+/*		meanTime[5]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;*/
 	}
 	
 	float meanSec[6] = {0};
 	
 	for (i = 0; i<6; i++){
 		meanTime[i]/=100;
-		meanTime[i]/=1000000;
-		meanSec[i]=((int)meanTime[i])%60;
-		meanTime[i]/=60;
+		
+		meanTime[i]=meanTime[i]/1000000;
+		meanSec[i]=meanTime[i];
+		meanTime[i]=0;
+		while (meanSec[i]>60){
+			meanSec[i]-=60;
+			meanTime[i]++;
+		}
 	}
 	
-	printf("Test Case A took %f minutes and %f seconds.\n", meanTime[0], meanSec[0]);
-	printf("Test Case B took %f minutes and %f seconds.\n", meanTime[1], meanSec[1]);
-	printf("Test Case C took %f minutes and %f seconds.\n", meanTime[2], meanSec[2]);
-	printf("Test Case D took %f minutes and %f seconds.\n", meanTime[3], meanSec[3]);
-	printf("Test Case E took %f minutes and %f seconds.\n", meanTime[4], meanSec[4]);
-	printf("Test Case F took %f minutes and %f seconds.\n", meanTime[5], meanSec[5]);
+	printf("Test Case A took %f minutes and %.10f seconds.\n", meanTime[0], meanSec[0]);
+	printf("Test Case B took %f minutes and %.10f seconds.\n", meanTime[1], meanSec[1]);
+	printf("Test Case C took %f minutes and %.10f seconds.\n", meanTime[2], meanSec[2]);
+	printf("Test Case D took %f minutes and %.10f seconds.\n", meanTime[3], meanSec[3]);
+	printf("Test Case E took %f minutes and %.10f seconds.\n", meanTime[4], meanSec[4]);
+	printf("Test Case F took %f minutes and %.10f seconds.\n", meanTime[5], meanSec[5]);
+
 	
 return 0;
 }
