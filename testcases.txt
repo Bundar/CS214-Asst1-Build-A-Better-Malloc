@@ -1,1 +1,7 @@
 testcases.txt:
+
+Workload E:
+This is similar to Workload D in that it pseudo-randomly decides to either malloc and free, 150 times total each. It chooses a static size to allocate: 25 bytes. All pointers are eventually freed. However, the main difference is that this workload randomly picks pointers to free rather than in any specific order. This tests for all general cases that can happen in the middle of the linked list, including two or more freed nodes next to one another, attempting mallocs greater than the total 5000 bytes available, attempting mallocs that fit in between two nodes, etc.
+
+Workload F:
+To test another edge case, we decided to malloc 27 bytes 150 times. This is not a random number, as 27 plus 6, the size of our node, is 33. 33*150 is 4950, very close to the maximum amount of possible dynamically allocatable memory. Then, we free all the nodes, except the very first and very last node. Finally, we attempt to dynamically allocate 3000 bytes to see if this will fit, which it should. This tests the corner case for dealing with memory located very close to the front and end of the given simulated storage. 
