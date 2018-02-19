@@ -35,6 +35,7 @@ void* mymalloc(size_t size, char* file, int line)
   //check if any memory has been allocated already by checking if p->prev is set to current address.
   if(p->prev != *((unsigned short *)&p))
   {
+  	//printf("%p",myblock);
     //check if you are trying to allocate more than 4988 bytes
     if(size>(5000-(2*sizeof(MemNode))))
     {
@@ -53,8 +54,8 @@ void* mymalloc(size_t size, char* file, int line)
     return (void*)(p+1);
   }
   //if first node is alreay allocated, run until memory is found that is not intentionally placed or used and there is enough space.
-  //while: node is active OR (Node is inactive AND theres not enough space to return a safe pointer to
-  while((p->active == *((unsigned short *)&p)) || ((p->active != *((unsigned short *)&p)) && (p->next-sizeof(MemNode)<=size)))
+  //while: node is active OR theres not enough space to return a safe pointer to
+  while((p->active == *((unsigned short *)&p)) || (p->next-sizeof(MemNode)<size))
   {
     //checks if requested memory will fit in remaining space.
     if((((char*)(p+1))+size) > (myblock+5000))
@@ -79,13 +80,15 @@ void* mymalloc(size_t size, char* file, int line)
   }
   //then deal with if adding in middle
   //checks if there is more than enough space
-  if((size+sizeof(MemNode)+1)<p->next)
+  //printf("size %d and space available %d\n", size, p->next-sizeof(MemNode));
+  if((size+sizeof(MemNode))<(p->next-sizeof(MemNode)))
   {
-    MemNode* newNode = (MemNode*)((char*)p + p->next);
+    MemNode* newNode = (MemNode*)((char*)p + size + sizeof(MemNode));
     newNode->next = (p->next) - (size + sizeof(MemNode));
-    newNode->prev = size;
+    newNode->prev = size + sizeof(MemNode);
+    newNode->active = 0;
     p->active = *((unsigned short *)&p);
-    p->next = size;
+    p->next = size + sizeof(MemNode);
     //printf("middle space optim %u\n",p->active);
     return (void*)(p+1);
   }
@@ -155,7 +158,6 @@ void* myfree(void* ptrv, char* file, int line)
     //if head
     if(node->prev == *((unsigned short *)&node))
     {
-      //MemNode* nextNode = (MemNode*)(((char*)node)+node->next);
       //if next is also free
       if(nextNode->active != *((unsigned short *)&nextNode))
       {

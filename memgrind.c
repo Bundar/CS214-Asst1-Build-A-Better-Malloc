@@ -29,7 +29,8 @@ int main(){
 /*	free(a);*/
 /*	free(b);*/
 /*	free(c);*/
-		
+
+
 	//100 iterations of workloads
 	i = 0;
 	for (i = 0; i<n; i++){
@@ -100,7 +101,7 @@ int main(){
 /*		meanTime[3]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;*/
 		
    	 	//workload E
-   	 	char* ptr = (char*) malloc(4994);	
+   	 	//char* ptr = (char*) malloc(4994);	
    	 	char* ptr2 = (char*) malloc(10);
    	 	
    	 	j = 0, m = 0, f = 0, k = 0;
@@ -111,14 +112,18 @@ int main(){
 		while(m+f<300){
 			int rd = rand() % 50;
 			if (rd<25 && m<150){
-				printf("%d malloc\n", j);
-				e[j] = (char*) malloc(200);
+				//printf("%d malloc\n", j);
+				e[j] = (char*) malloc(25);
+				if (e[j]==NULL) printf("ERRRRRROROROROROR");
+				//printf("%p\n",e[j]);
 				m++, j++;
 			}
 			else if(j>0){
 				int rdPtr = rand() % j;
-				printf("%d free\n", (j-1));
-				free(e[rdPtr]);
+				//printf("%d free of %d node\n", (j-1), rdPtr);
+				char* test = free(e[rdPtr]);
+				if (test==NULL) printf("error");
+				//printf("%p\n",e[j]);
 				for (k=rdPtr; k<j; k++){
 					e[k] = e[k+1];
 				}
@@ -126,9 +131,66 @@ int main(){
 				
 			}
 		}
+/*		e[0] = (char*) malloc(200);*/
+/*		e[1] = (char*) malloc(200);*/
+/*		e[2] = (char*) malloc(200);*/
+/*		e[3] = (char*) malloc(200);*/
+/*		e[4] = (char*) malloc(200);*/
+/*		e[5] = (char*) malloc(200);*/
+/*		e[6] = (char*) malloc(200);*/
+/*		e[7] = (char*) malloc(200);*/
+/*		printf("\n");*/
+/*		printf("%p\n",e[0]);*/
+/*		free(e[0]);*/
+/*		printf("%p\n",e[2]);*/
+/*		free(e[2]);*/
+/*		printf("%p\n",e[4]);*/
+/*		free(e[4]);*/
+/*		printf("%p\n",e[6]);*/
+/*		free(e[6]);*/
+/*		e[0] = (char*) malloc(200);*/
+/*		e[2] = (char*) malloc(200);*/
+/*		e[4] = (char*) malloc(200);*/
+/*		e[6] = (char*) malloc(200);*/
+/*		printf("\n");*/
+/*		printf("%p\n",e[0]);*/
+/*		printf("%p\n",e[2]);*/
+/*		printf("%p\n",e[4]);*/
+/*		printf("%p\n",e[6]);*/
+		
+/*		for (j=0;j<15;j++){*/
+/*			e[j] = (char*) malloc(2);*/
+/*			printf("%p\n",e[j]);*/
+/*		}*/
+/*		printf("\n");*/
+/*		for (j=0;j<15;j+=2){*/
+/*			free(e[j]);*/
+/*			printf("%p\n",e[j]);*/
+/*		}*/
+/*	printf("\n");*/
+/*		for (j=1;j<15;j+=2){*/
+/*			free(e[j]);*/
+/*			printf("%p\n",e[j]);*/
+/*		}*/
+/*		printf("\n");*/
+/*		for (j=0;j<15;j+=2){*/
+/*			e[j] = (char*) malloc(2);*/
+/*			printf("%p\n",e[j]);*/
+/*		}*/
+/*		printf("\n");*/
+/*		for (j=1;j<15;j+=2){*/
+/*			e[j] = (char*) malloc(2);*/
+/*			printf("%p\n",e[j]);*/
+/*		}*/
+/*		printf("\n");*/
+/*		*/
+/*		free(e[3]);*/
+/*		free(e[4]);*/
+/*		e[3] = (char*) malloc(2);		*/
+		
 		gettimeofday(&end, NULL); //end time
 		meanTime[4]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;
-   	 		
+	
 /*    		//workload F*/
 /*    		*/
 /*    		char* f[150] = {NULL};*/
@@ -142,7 +204,6 @@ int main(){
 /*			free(f[j]);*/
 /*		}*/
 /*		*/
-/*		f[1]= (char*) malloc(4500);*/
 /*		f[1] = (char*) malloc(3000);*/
 /*		gettimeofday(&end, NULL); //end time*/
 /*		meanTime[5]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;*/
