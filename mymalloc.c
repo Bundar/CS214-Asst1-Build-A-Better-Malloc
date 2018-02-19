@@ -13,7 +13,18 @@ immplements our version of malloc
 static char myblock[5000];
 
 static int errorCount = 0;
-
+void printLL(char* freeormal, MemNode* node){
+  printf("%s %p:\n-------------------------------------\n",freeormal, node);
+  int count = 0;
+  MemNode* ptr = (MemNode*)myblock;
+  while(((char*)ptr)+ptr->next != myblock+5000){
+    count++;
+    printf("| %p | next: %d | prev: %d | %d |\n",ptr,ptr->next,ptr->prev,ptr->active);
+    ptr = (MemNode*)((char*)ptr + ptr->next);
+  }
+  printf("| %p | next: %d | prev: %d |\n",ptr,ptr->next,ptr->prev);
+  printf("count: %d\n-------------------------------------\n",count);
+}
 /*
 Function: mymalloc
 -------------------------------------
@@ -44,13 +55,14 @@ void* mymalloc(size_t size, char* file, int line)
     }
     //create first node and second node to manage the tail.
     p->prev = *((unsigned short *)&p);
-    p->next = size+sizeof(MemNode);
+    p->next = 31;
     p->active = p->prev;
     MemNode* nextNode = (MemNode*)(((char*)p)+(p->next));
     nextNode->prev = p->next;
     nextNode->next = 5000 - (nextNode->prev);
     //printf("size of remaining space %d\n", nextNode->next);
     //printf("head %u\n",p->active);
+    printLL("New Head: malloc", p);
     return (void*)(p+1);
   }
   //if first node is alreay allocated, run until memory is found that is not intentionally placed or used and there is enough space.
@@ -76,6 +88,7 @@ void* mymalloc(size_t size, char* file, int line)
     p->active = *((unsigned short *)&p);
     p->next = size + sizeof(MemNode);
     //printf("last %u\n",p->active);
+    printLL("Tail: malloc", p);
     return (void*)(p+1);    
   }
   //then deal with if adding in middle
@@ -90,6 +103,7 @@ void* mymalloc(size_t size, char* file, int line)
     p->active = *((unsigned short *)&p);
     p->next = size + sizeof(MemNode);
     //printf("middle space optim %u\n",p->active);
+    printLL("Optim: malloc", p);
     return (void*)(p+1);
   }
   
@@ -97,6 +111,7 @@ void* mymalloc(size_t size, char* file, int line)
   //returns pointer to memory allocated right after meta data.
   p->active = *((unsigned short *)&p);
   //printf("middle %u\n",p->active);
+  printLL("Base: malloc" , p);
   return (void*)(p+1);
 }
 /*
@@ -169,6 +184,7 @@ void* myfree(void* ptrv, char* file, int line)
           nextnextNode->prev += nextNode->prev;
         }
       }
+      printLL("Head: free", node);
       return (void*)(node+1);
     }
     //Case 2:
@@ -181,6 +197,7 @@ void* myfree(void* ptrv, char* file, int line)
       if(((char*)nextNode)+nextNode->next == myblock+5000)
       {
       	prevNode->next+=nextNode->next;
+       printLL("Prev Free: free", node);
         return (void*)(node+1);
       }
       nextNode->prev += node->prev;
@@ -197,6 +214,7 @@ void* myfree(void* ptrv, char* file, int line)
         nextnextNode->prev += nextNode->prev;
       }
     }
+    printLL("Next Free: free",node);
     return (void*)(node+1);
   }
 }
