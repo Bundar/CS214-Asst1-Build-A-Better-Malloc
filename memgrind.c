@@ -8,6 +8,7 @@ memgrind.c
 tests our implementation of the malloc function and analyzes time complexity.
 */
 #include <sys/time.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "mymalloc.h"
@@ -21,22 +22,30 @@ int main(){
 		meanTime[i] = 0;
 	}
 	
+/*	char* a = (char*) malloc(1);*/
+/*	char* b = (char*) malloc(1);*/
+/*	char* c = (char*) malloc(1);*/
+/*	printf("\n");*/
+/*	free(a);*/
+/*	free(b);*/
+/*	free(c);*/
+		
 	//100 iterations of workloads
 	i = 0;
 	for (i = 0; i<n; i++){
 		
 		struct timeval start, end;
 		
-		//workload A
-		j = 0;
-		gettimeofday(&start, NULL); //start time 
-		for (j = 0; j<150; j++){ //150 iterations
-			char* a = (char*) malloc(1); //mallocs 1 byte
-			free(a); //immediately frees
-		}
-		gettimeofday(&end, NULL); //end time
-		meanTime[0]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;
-		
+/*		//workload A*/
+/*		j = 0;*/
+/*		gettimeofday(&start, NULL); //start time */
+/*		for (j = 0; j<150; j++){ //150 iterations*/
+/*			char* a = (char*) malloc(1); //mallocs 1 byte*/
+/*			free(a); //immediately frees*/
+/*		}*/
+/*		gettimeofday(&end, NULL); //end time*/
+/*		meanTime[0]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;*/
+/*		*/
 /*		//workload B*/
 /*		j = 0;*/
 /*		char* b[150]; //static array 150 pointers long*/
@@ -49,22 +58,21 @@ int main(){
 /*		}*/
 /*		gettimeofday(&end, NULL); //end time*/
 /*		meanTime[1]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;*/
-		
+/*		*/
 /*		//workload C*/
 /*		j = 0, m = 0, f = 0;*/
 /*		srand(time(0));*/
 /*		char* c[150] = {NULL};*/
 /*		gettimeofday(&start, NULL); //start time*/
-/*		while(m+f<300){*/
+/*		while(m+f<6){*/
 /*			int rd = rand() % 50;*/
-/*			if (rd<25 && m<150){*/
+/*			if (rd<25 && m<3){*/
 /*				c[j] = (char*) malloc(1);*/
-/*				m++, j++;*/
+/*				m++, j++;	*/
 /*			}*/
 /*			else if(j>0){*/
 /*				f++, j--;				*/
 /*				free(c[j]);*/
-/*				*/
 /*			}*/
 /*		}*/
 /*		gettimeofday(&end, NULL); //end time*/
@@ -90,35 +98,37 @@ int main(){
 /*		}*/
 /*		gettimeofday(&end, NULL); //end time*/
 /*		meanTime[3]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;*/
-/*		*/
-/*   	 	//workload E*/
-/*   	 	char* ptr = (char*) malloc(4994);	*/
-/*   	 	char* ptr2 = (char*) malloc(10);*/
-/*   	 	*/
-/*   	 	j = 0, m = 0, f = 0, k = 0;*/
-/*		srand(time(0));*/
-/*		char* e[150] = {NULL};*/
-/*		*/
-/*		gettimeofday(&start, NULL); //start time*/
-/*		while(m+f<300){*/
-/*			int rd = rand() % 50;*/
-/*			if (rd<25 && m<150){*/
-/*				e[j] = (char*) malloc(200);*/
-/*				m++, j++;*/
-/*			}*/
-/*			else if(j>0){*/
-/*				int rdPtr = rand() % j;*/
-/*				free(e[rdPtr]);*/
-/*				for (k=rdPtr; k<j; k++){*/
-/*					e[k] = e[k+1];*/
-/*				}*/
-/*				f++, j--;*/
-/*				*/
-/*			}*/
-/*		}*/
-/*		gettimeofday(&end, NULL); //end time*/
-/*		meanTime[4]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;*/
-/*   	 		*/
+		
+   	 	//workload E
+   	 	char* ptr = (char*) malloc(4994);	
+   	 	char* ptr2 = (char*) malloc(10);
+   	 	
+   	 	j = 0, m = 0, f = 0, k = 0;
+		srand(time(0));
+		char* e[150] = {NULL};
+		
+		gettimeofday(&start, NULL); //start time
+		while(m+f<300){
+			int rd = rand() % 50;
+			if (rd<25 && m<150){
+				printf("%d malloc\n", j);
+				e[j] = (char*) malloc(200);
+				m++, j++;
+			}
+			else if(j>0){
+				int rdPtr = rand() % j;
+				printf("%d free\n", (j-1));
+				free(e[rdPtr]);
+				for (k=rdPtr; k<j; k++){
+					e[k] = e[k+1];
+				}
+				f++, j--;
+				
+			}
+		}
+		gettimeofday(&end, NULL); //end time
+		meanTime[4]+=(end.tv_sec-start.tv_sec)*1000000 + end.tv_usec-start.tv_usec;
+   	 		
 /*    		//workload F*/
 /*    		*/
 /*    		char* f[150] = {NULL};*/

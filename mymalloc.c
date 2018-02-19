@@ -25,6 +25,10 @@ returns: The pointer to the head of the memory with size equal to or greater tha
 */
 void* mymalloc(size_t size, char* file, int line)
 {
+	if (size == 0){
+		printf("%s:%d error: no requested memory\n",file,line);
+      		return NULL;
+	}
   //treats the first addess of mem as if it was a MemNode.
   MemNode* p = (MemNode*) myblock;
   //sets previous 
@@ -40,9 +44,12 @@ void* mymalloc(size_t size, char* file, int line)
     //create first node and second node to manage the tail.
     p->prev = *((unsigned short *)&p);
     p->next = size+sizeof(MemNode);
+    p->active = p->prev;
     MemNode* nextNode = (MemNode*)(((char*)p)+(p->next));
-    nextNode->prev = p->next + sizeof(MemNode);
-    nextNode->next = 5000 - (nextNode->prev + sizeof(MemNode));
+    nextNode->prev = p->next;
+    nextNode->next = 5000 - (nextNode->prev);
+    //printf("size of remaining space %d\n", nextNode->next);
+    //printf("head %u\n",p->active);
     return (void*)(p+1);
   }
   //if first node is alreay allocated, run until memory is found that is not intentionally placed or used and there is enough space.
@@ -59,13 +66,15 @@ void* mymalloc(size_t size, char* file, int line)
   }
   //once loop finds open node or empty space: 
   //first check if adding to end of LL
+    //printf("size of space after available node %d\n", p->next);
   if(((char*)p)+p->next == myblock+5000)
   {  
-    MemNode* newTail = (MemNode*)((char*)p + size);
-    newTail->next = (myblock+5000) - (((char*)newTail) + sizeof(MemNode));
-    newTail->prev = size;
+    MemNode* newTail = (MemNode*)((char*)p + size+ sizeof(MemNode));
+    newTail->next = (myblock+5000) - ((char*)newTail);
+    newTail->prev = size + sizeof(MemNode);
     p->active = *((unsigned short *)&p);
-    p->next = size;
+    p->next = size + sizeof(MemNode);
+    //printf("last %u\n",p->active);
     return (void*)(p+1);    
   }
   //then deal with if adding in middle
@@ -77,12 +86,14 @@ void* mymalloc(size_t size, char* file, int line)
     newNode->prev = size;
     p->active = *((unsigned short *)&p);
     p->next = size;
+    //printf("middle space optim %u\n",p->active);
     return (void*)(p+1);
   }
   
   //if there is just enough space or not enough space for the new node and the size
   //returns pointer to memory allocated right after meta data.
   p->active = *((unsigned short *)&p);
+  //printf("middle %u\n",p->active);
   return (void*)(p+1);
 }
 /*
@@ -94,16 +105,19 @@ file: file name of file being ran.
 line: line number of current function call.
 returns: The pointer to the head of the memory that is now available.
 */
-void* myfree(void* ptr, char* file, int line)
+void* myfree(void* ptrv, char* file, int line)
 {
+
+	char* ptr = (char*) ptrv;
+	//printf("%u\n", ((MemNode*)(ptr-sizeof(MemNode)))->active);
   //checks if ptr points to a place NOT in the array of 5000 chars
-  if(ptr-sizeof(MemNode) < (void*) myblock || ptr-sizeof(MemNode) > (void*) myblock+5000)
+  if(ptr-sizeof(MemNode) < myblock || ptr-sizeof(MemNode) > myblock+5000)
   {
     printf("%s:%d error: out of bounds of addressable memory.\n",file,line);
     return NULL;
   }
   //finds MemNode that manages given memory
-  MemNode* node = (MemNode*)(((char*)ptr)-sizeof(MemNode));
+  MemNode* node = (MemNode*)(ptr-sizeof(MemNode));
   //checks if node points to a valid previously allocated memory address
   if(node->active != *((unsigned short *)&node))
   {
@@ -164,6 +178,7 @@ void* myfree(void* ptr, char* file, int line)
       //if next is tail
       if(((char*)nextNode)+nextNode->next == myblock+5000)
       {
+      	prevNode->next+=nextNode->next;
         return (void*)(node+1);
       }
       nextNode->prev += node->prev;
